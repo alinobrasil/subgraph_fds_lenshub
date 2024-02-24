@@ -8,7 +8,8 @@ dataSources:
     name: LensHub
     network: matic
     source:
-      address: "0x176c2a1c54E8b028eeEC14bF0a059E354408FF47"
+      address: "0xDb46d1Dc155634FbC732f92E853b10B288AD5a1d" #this is the proxy contract
+      #"0x176c2a1c54E8b028eeEC14bF0a059E354408FF47" #initialized with implementation contract
       abi: LensHub
       startBlock: 53479915
     mapping:
@@ -30,24 +31,34 @@ dataSources:
         - name: LensHub
           file: ./abis/LensHub.json
       eventHandlers:
-        - event: Approval(indexed address,indexed address,indexed uint256)
-          handler: handleApproval
-        - event: ApprovalForAll(indexed address,indexed address,bool)
-          handler: handleApprovalForAll
-        - event: BatchMetadataUpdate(uint256,uint256)
-          handler: handleBatchMetadataUpdate
-        - event: CollectNFTTransferred(indexed uint256,indexed uint256,indexed uint256,address,address,uint256)
-          handler: handleCollectNFTTransferred
-        - event: LensUpgradeVersion(address,string,bytes20,uint256)
-          handler: handleLensUpgradeVersion
-        - event: TokenGuardianStateChanged(indexed address,indexed bool,uint256,uint256)
-          handler: handleTokenGuardianStateChanged
-        - event: Transfer(indexed address,indexed address,indexed uint256)
-          handler: handleTransfer
-        - event: TreasuryFeeSet(indexed uint16,indexed uint16,uint256)
-          handler: handleTreasuryFeeSet
-        - event: TreasurySet(indexed address,indexed address,uint256)
-          handler: handleTreasurySet
-        - event: Unfollowed(indexed uint256,uint256,address,uint256)
-          handler: handleUnfollowed
+        ## event details obtained from running graph codegen - available events. Custom type postParams wrapped in a tuple.
+        - event: PostCreated((uint256,string,address[],bytes[],address,bytes),indexed uint256,bytes[],bytes,address,uint256) 
+          handler: handlePostCreated
+      file: ./src/lens-hub.ts
+templates:
+  - kind: file/arweave
+    name: ArweaveContent
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - PostContent
+      abis:
+        - name: LensHub
+          file: ./abis/LensHub.json
+      handler: handlePostContent
+      file: ./src/lens-hub.ts
+  - kind: file/ipfs
+    name: IpfsContent
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - PostContent
+      abis:
+        - name: LensHub
+          file: ./abis/LensHub.json
+      handler: handlePostContent
       file: ./src/lens-hub.ts
